@@ -1066,7 +1066,7 @@ rl_redisplay (void)
     {
       if (in == hl_begin)
 	cur_face = FACE_STANDOUT;
-      else if (in == hl_end)
+      if (in == hl_end)
 	cur_face = FACE_NORMAL;
 
       c = (unsigned char)rl_line_buffer[in];
