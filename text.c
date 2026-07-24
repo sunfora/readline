@@ -1915,13 +1915,45 @@ rl_exchange_point_and_mark (int count, int key)
   return 0;
 }
 
+int
+rl_toggle_region_forecast (int key, int count)
+{
+  if (rl_region_forecast_p ()) 
+    rl_region_forecast_disable ();
+  else 
+    rl_region_forecast_enable ();
+  return 0;
+}
+
 /* Active mark support */
 
 /* Is the region active? */
 static int mark_active = 0;
 
+/* Is the forecast mode is enabled for region? */
+static int region_forecast = 0;
+
 /* Does the current command want the mark to remain active when it completes? */
 int _rl_keep_mark_active;
+
+
+int
+rl_region_forecast_p (void)
+{
+  return (region_forecast);
+}
+
+void
+rl_region_forecast_disable (void)
+{
+  region_forecast = 0;
+}
+
+void
+rl_region_forecast_enable (void)
+{
+  region_forecast = 0b10;
+}
 
 void
 rl_keep_mark_active (void)
@@ -1945,7 +1977,7 @@ rl_deactivate_mark (void)
 int
 rl_mark_active_p (void)
 {
-  return (mark_active);
+  return (mark_active | region_forecast);
 }
 
 /* **************************************************************** */

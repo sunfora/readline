@@ -871,6 +871,7 @@ opcode_dispatch:
       rl_ding ();
       cxt->history_pos = cxt->last_found_line;
       rl_deactivate_mark ();
+      rl_region_forecast_disable ();
       rl_display_search (cxt->search_string, cxt->sflags, (cxt->history_pos == cxt->save_line) ? -1 : cxt->history_pos);
       return 1;
     }

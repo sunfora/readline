@@ -136,6 +136,7 @@ static const FUNMAP default_funmap[] = {
   { "start-kbd-macro", rl_start_kbd_macro },
   { "tab-insert", rl_tab_insert },
   { "tilde-expand", rl_tilde_expand },
+  { "toggle-region-forecast", rl_toggle_region_forecast },
   { "transpose-chars", rl_transpose_chars },
   { "transpose-words", rl_transpose_words },
   { "tty-status", rl_tty_status },

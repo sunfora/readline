@@ -780,6 +780,7 @@ rl_named_function (const char *string)
   register int i;
 
   rl_initialize_funmap ();
+  rl_region_forecast_disable ();
 
   for (i = 0; funmap[i]; i++)
     if (_rl_stricmp (funmap[i]->name, string) == 0)

@@ -437,6 +437,7 @@ readline_internal_setup (void)
   run_startup_hooks ();
 
   rl_deactivate_mark ();
+  rl_region_forecast_disable ();
 
 #if defined (VI_MODE)
   if (rl_editing_mode == vi_mode)
@@ -913,6 +914,20 @@ _rl_dispatch_subseq (register int key, Keymap map, int got_subseq)
       func = map[key].function;
       if (func)
 	{
+          /* Special case for region forecast: movement functions */
+          if (!((func == rl_backward_char)
+              || (func == rl_forward_char)
+              || (func == rl_set_mark)
+              || (func == rl_exchange_point_and_mark) 
+              || (func == rl_beg_of_line) 
+              || (func == rl_end_of_line) 
+              || (func == rl_forward_word) 
+              || (func == rl_backward_word) 
+              || (func == rl_clear_display) 
+              || (func == rl_clear_screen) 
+              || (func == rl_toggle_region_forecast)))
+            rl_region_forecast_disable ();
+
 	  /* Special case rl_do_lowercase_version (). */
 	  if (func == rl_do_lowercase_version)
 	    {
@@ -1564,6 +1579,7 @@ rl_restore_state (struct readline_state *sp)
   rl_completer_word_break_characters = sp->wordbreakchars;
 
   rl_deactivate_mark ();
+  rl_region_forecast_disable ();
 
   return (0);
 }

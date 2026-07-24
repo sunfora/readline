@@ -139,6 +139,7 @@ extern int rl_fetch_history (int, int);
 /* Bindable commands for managing the mark and region. */
 extern int rl_set_mark (int, int);
 extern int rl_exchange_point_and_mark (int, int);
+extern int rl_toggle_region_forecast (int, int);
 
 /* Bindable commands to set the editing mode (emacs or vi). */
 extern int rl_vi_editing_mode (int, int);
@@ -408,6 +409,13 @@ extern void rl_keep_mark_active (void);
 extern void rl_activate_mark (void);
 extern void rl_deactivate_mark (void);
 extern int rl_mark_active_p (void);
+
+/* Functions to enable / disable highlight forecasting 
+   while other means highlight region automatically 
+   this allows a user to make region active on demand. */
+extern int rl_region_forecast_p (void);
+extern void rl_region_forecast_disable (void);
+extern void rl_region_forecast_enable (void);
 
 extern int rl_message (const char *, ...)  __attribute__((__format__ (printf, 1, 2)));
 
