@@ -38,3 +38,10 @@ readline.pc
 history.pc
 
 stamp-h
+
+# remove some local build / debug / contribution stuff
+# I use from tracking
+build
+patches
+compile_commands.json
+.gdb_history
