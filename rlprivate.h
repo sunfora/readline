@@ -474,6 +474,8 @@ extern void _rl_standout_off (void);
 extern int _rl_reset_region_color (int, const char *);
 extern void _rl_region_color_on (void);
 extern void _rl_region_color_off (void);
+extern void _rl_visible_mark_color_on (void);
+extern void _rl_visible_mark_color_off (void);
 
 /* text.c */
 extern void _rl_fix_point (int);

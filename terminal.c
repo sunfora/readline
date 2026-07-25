@@ -980,6 +980,40 @@ _rl_region_color_off (void)
 #endif
 }
 
+void
+_rl_visible_mark_color_on (void)
+{
+#ifndef __MSDOS__
+  // TODO(ivan): add checks and make it customizable
+  // if (_rl_active_region_start_color && _rl_active_region_end_color)
+    tputs ("\033[105m", 1, _rl_output_character_function);
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// NOTE(ivan): to blink the text just use \e[5m and reset it back with \e[25m
+//             u can use this to implement well, the macro recorder
+//             by the way it is a nice patch on its own
+//
+//             while the harder ones:
+//
+//               1. transient-mode
+//               2. visual selection mode for vi
+//               3. mark-visible
+//
+//             may wait for a while
+////////////////////////////////////////////////////////////////////////////////
+
+void
+_rl_visible_mark_color_off (void)
+{
+#ifndef __MSDOS__
+  // TODO(ivan): add checks and make it customizable
+  // if (_rl_active_region_start_color && _rl_active_region_end_color)
+    tputs ("\033[49m", 1, _rl_output_character_function);
+#endif
+}
+
 /* **************************************************************** */
 /*								    */
 /*	 	Controlling the Meta Key and Keypad		    */

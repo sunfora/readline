@@ -132,7 +132,10 @@ static int _rl_col_width (const char *, int, int, int);
 
 #define FACE_NORMAL	'0'
 #define FACE_STANDOUT	'1'
+#define FACE_VISIBLE_MARK '2'
 #define FACE_INVALID	((char)1)
+
+#define FACE_ISSET(x, y) (x > '0' && y > '0' && ((x - '0') & (y - '0')))
   
 /* **************************************************************** */
 /*								    */
@@ -1064,10 +1067,12 @@ rl_redisplay (void)
   for (in = 0; in < rl_end; in++)
 #endif
     {
-      if (in == hl_begin)
-	cur_face = FACE_STANDOUT;
-      if (in == hl_end)
-	cur_face = FACE_NORMAL;
+      cur_face = FACE_NORMAL;
+
+      if (in == rl_mark)
+        cur_face += (FACE_VISIBLE_MARK - '0');
+      if (hl_begin <= in && in < hl_end)
+        cur_face += (FACE_STANDOUT - '0');
 
       c = (unsigned char)rl_line_buffer[in];
 
@@ -1712,6 +1717,12 @@ rl_redisplay (void)
   RL_UNSETSTATE (RL_STATE_REDISPLAYING);
 }
 
+static int
+supported_face_style (int face)
+{
+  return '0' <= face && face <= '3';
+}
+
 static void
 putc_face (int c, int face, char *cur_face)
 {
@@ -1719,14 +1730,21 @@ putc_face (int c, int face, char *cur_face)
   cf = *cur_face;
   if (cf != face)
     {
-      if (cf != FACE_NORMAL && cf != FACE_STANDOUT)
-	return;
-      if (face != FACE_NORMAL && face != FACE_STANDOUT)
-	return;
-      if (face == FACE_STANDOUT && cf == FACE_NORMAL)
-	_rl_region_color_on ();
-      if (face == FACE_NORMAL && cf == FACE_STANDOUT)
+      if (!supported_face_style (cf))
+        return;
+      if (!supported_face_style (face))
+        return;
+      
+      if (!FACE_ISSET (face, FACE_VISIBLE_MARK) && FACE_ISSET (cf, FACE_VISIBLE_MARK))
+        _rl_visible_mark_color_off ();
+      if (!FACE_ISSET (face, FACE_STANDOUT) && FACE_ISSET (cf, FACE_STANDOUT))
 	_rl_region_color_off ();
+
+      if (FACE_ISSET (face, FACE_STANDOUT) && !FACE_ISSET (cf, FACE_STANDOUT))
+	_rl_region_color_on ();
+      if (FACE_ISSET (face, FACE_VISIBLE_MARK) && !FACE_ISSET (cf, FACE_VISIBLE_MARK))
+        _rl_visible_mark_color_on ();
+
       *cur_face = face;
     }
   if (c != EOF)
