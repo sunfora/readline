@@ -1036,9 +1036,7 @@ void
 _rl_mark_color_on (void)
 {
 #ifndef __MSDOS__
-  if (_rl_enable_mark_color
-      && _rl_mark_start_color 
-      && _rl_mark_end_color)
+  if (_rl_mark_start_color && _rl_mark_end_color)
     tputs (_rl_mark_start_color, 1, _rl_output_character_function);
 #endif
 }
@@ -1061,9 +1059,7 @@ void
 _rl_mark_color_off (void)
 {
 #ifndef __MSDOS__
-  if (_rl_enable_mark_color
-      && _rl_mark_start_color 
-      && _rl_mark_end_color)
+  if (_rl_mark_start_color && _rl_mark_end_color)
     tputs (_rl_mark_end_color, 1, _rl_output_character_function);
 #endif
 }

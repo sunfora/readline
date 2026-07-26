@@ -1139,10 +1139,13 @@ rl_tab_insert (int count, int key)
 int
 rl_newline (int count, int key)
 {
-  if (rl_mark_active_p ())
+  if (rl_mark_active_p () || _rl_enable_mark_color)
     {
       rl_deactivate_mark ();
+      int mark_color = _rl_enable_mark_color;
+      _rl_enable_mark_color = 0;
       (*rl_redisplay_function) ();
+      _rl_enable_mark_color = mark_color;
       _rl_want_redisplay = 0;
     }
 

@@ -1069,7 +1069,7 @@ rl_redisplay (void)
     {
       cur_face = FACE_NORMAL;
 
-      if (in == rl_mark)
+      if (in == rl_mark && _rl_enable_mark_color)
         cur_face += (FACE_VISIBLE_MARK - '0');
       if (hl_begin <= in && in < hl_end)
         cur_face += (FACE_STANDOUT - '0');
