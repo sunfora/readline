@@ -326,6 +326,10 @@ int _rl_show_mode_in_prompt = 0;
 int _rl_enable_bracketed_paste = BRACKETED_PASTE_DEFAULT;
 int _rl_enable_active_region = BRACKETED_PASTE_DEFAULT;
 
+/* Non-zero means to highlight the mark 
+   so it is as visible as the current cursor */
+int _rl_enable_mark_color = 0;
+
 /* **************************************************************** */
 /*								    */
 /*			Top Level Functions			    */

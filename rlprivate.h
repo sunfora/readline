@@ -472,10 +472,11 @@ extern void _rl_set_cursor (int, int);
 extern void _rl_standout_on (void);
 extern void _rl_standout_off (void);
 extern int _rl_reset_region_color (int, const char *);
+extern int _rl_reset_mark_color (int, const char *);
 extern void _rl_region_color_on (void);
 extern void _rl_region_color_off (void);
-extern void _rl_visible_mark_color_on (void);
-extern void _rl_visible_mark_color_off (void);
+extern void _rl_mark_color_on (void);
+extern void _rl_mark_color_off (void);
 
 /* text.c */
 extern void _rl_fix_point (int);
@@ -621,8 +622,11 @@ extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
 extern int _rl_enable_bracketed_paste;
 extern int _rl_enable_active_region;
+extern int _rl_enable_mark_color;
 extern char *_rl_active_region_start_color;
 extern char *_rl_active_region_end_color;
+extern char *_rl_mark_start_color;
+extern char *_rl_mark_end_color;
 extern char *_rl_comment_begin;
 extern unsigned char _rl_parsing_conditionalized_out;
 extern Keymap _rl_keymap;

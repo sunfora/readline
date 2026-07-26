@@ -1885,6 +1885,7 @@ static const struct {
   { "disable-completion",	&rl_inhibit_completion,		0 },
   { "echo-control-characters",	&_rl_echo_control_chars,	0 },
   { "enable-active-region",	&_rl_enable_active_region,	0 },
+  { "enable-mark-color",	&_rl_enable_mark_color,	        0 },
   { "enable-bracketed-paste",	&_rl_enable_bracketed_paste,	V_SPECIAL },
   { "enable-keypad",		&_rl_enable_keypad,		0 },
   { "enable-meta-key",		&_rl_enable_meta,		0 },
@@ -1973,6 +1974,8 @@ typedef int _rl_sv_func_t (const char *);
 /* Forward declarations */
 static int sv_region_start_color (const char *);
 static int sv_region_end_color (const char *);
+static int sv_mark_start_color (const char *);
+static int sv_mark_end_color (const char *);
 static int sv_bell_style (const char *);
 static int sv_combegin (const char *);
 static int sv_dispprefix (const char *);
@@ -2007,6 +2010,8 @@ static const struct {
   { "keyseq-timeout",	V_INT,		sv_seqtimeout },
   { "vi-cmd-mode-string", V_STRING,	sv_vicmd_modestr }, 
   { "vi-ins-mode-string", V_STRING,	sv_viins_modestr }, 
+  { "mark-end-color", V_STRING, sv_mark_end_color },
+  { "mark-start-color", V_STRING, sv_mark_start_color },
   { (char *)NULL,	0, (_rl_sv_func_t *)0 }
 };
 
@@ -2222,6 +2227,18 @@ static int
 sv_region_end_color (const char *value)
 {
   return (_rl_reset_region_color (1, value));
+}
+
+static int
+sv_mark_start_color (const char *value)
+{
+  return (_rl_reset_mark_color (0, value));
+}
+
+static int
+sv_mark_end_color (const char *value)
+{
+  return (_rl_reset_mark_color(1, value));
 }
 
 static int
@@ -2917,8 +2934,45 @@ _rl_get_string_variable_value (const char *name)
 {
   static char numbuf[64];	/* more than enough for INTMAX_MAX */
   char *ret;
-
-  if (_rl_stricmp (name, "active-region-start-color") == 0)
+  
+  ////////////////////////////////////////////////////
+  // TODO(ivan): so much copy paste is going on
+  //             you should just make a table
+  //             
+  //             name - function 
+  //             and do a loop matching it
+  ////////////////////////////////////////////////////
+  if (_rl_stricmp (name, "mark-start-color") == 0)
+    {
+      if (_rl_mark_start_color == 0)
+	return 0;
+      ret = _rl_untranslate_macro_value (_rl_mark_start_color, 0);
+      if (ret)
+	{
+	  strncpy (numbuf, ret, sizeof (numbuf) - 1);
+	  xfree (ret);
+	  numbuf[sizeof(numbuf) - 1] = '\0';
+	}
+      else
+	numbuf[0] = '\0';
+      return numbuf;
+    }
+  else if (_rl_stricmp (name, "mark-end-color") == 0)
+    {
+      if (_rl_mark_end_color == 0)
+	return 0;
+      ret = _rl_untranslate_macro_value (_rl_mark_end_color, 0);
+      if (ret)
+	{
+	  strncpy (numbuf, ret, sizeof (numbuf) - 1);
+	  xfree (ret);
+	  numbuf[sizeof(numbuf) - 1] = '\0';
+	}
+      else
+	numbuf[0] = '\0';
+      return numbuf;
+    }
+  else if (_rl_stricmp (name, "active-region-start-color") == 0)
     {
       if (_rl_active_region_start_color == 0)
 	return 0;

@@ -200,6 +200,11 @@ static char *_rl_term_PE;	/* paste end */
 char *_rl_active_region_start_color = NULL;
 char *_rl_active_region_end_color = NULL;
 
+/* User-settable color sequences to visually highlight the mark. Defaults
+   are rl_term_so and rl_term_se on non-dumb terminals. */
+char *_rl_mark_start_color = NULL;
+char *_rl_mark_end_color = NULL;
+
 /* It's not clear how HPUX is so broken here. */
 #ifdef TGETENT_BROKEN
 #  define TGETENT_SUCCESS 0
@@ -584,6 +589,7 @@ _rl_init_terminal_io (const char *terminal_name)
   if (dumbterm)
     _rl_term_isansi = 0;
 
+  // RESEARCH(ivan): why it is here???
   reset_region_colors = 1;
 
 #ifdef __MSDOS__
@@ -682,6 +688,10 @@ _rl_init_terminal_io (const char *terminal_name)
       _rl_reset_region_color (0, NULL);
       _rl_reset_region_color (1, NULL);
     
+      _rl_enable_mark_color = 0;
+      _rl_reset_mark_color (0, NULL);
+      _rl_reset_mark_color (1, NULL);
+
       /* Reasonable defaults for tgoto().  Readline currently only uses
          tgoto if _rl_term_IC or _rl_term_DC is defined, but just in case we
          change that later... */
@@ -740,7 +750,11 @@ _rl_init_terminal_io (const char *terminal_name)
      bracketed paste mode, so we assume a non-ANSI terminal (as best as we
      can determine) does not. */
   if (_rl_term_isansi == 0)
-    _rl_enable_bracketed_paste = _rl_enable_active_region = 0;
+    {
+      _rl_enable_bracketed_paste = 0;
+      _rl_enable_active_region = 0;
+      _rl_enable_mark_color = 0;
+    }
 
   if (reset_region_colors)
     {
@@ -925,6 +939,11 @@ _rl_standout_off (void)
 /*								    */
 /* **************************************************************** */
 
+// NOTE(ivan): refactor it a little, it doesn't look good
+//             I just copy pasted it to see if it works
+//             but maybe we can factor out a function and just call them
+//             right?
+
 /* Reset the region color variables to VALUE depending on WHICH (0 == start,
    1 == end). This is where all the memory allocation for the color variable
    strings is performed. We might want to pass a flag saying whether or not
@@ -962,6 +981,39 @@ _rl_reset_region_color (int which, const char *value)
   return 0;
 }
 
+int
+_rl_reset_mark_color (int which, const char *value)
+{
+  int len;
+
+  if (which == 0)
+    {
+      xfree (_rl_mark_start_color);
+      if (value && *value)
+	{
+	  _rl_mark_start_color = (char *)xmalloc (2 * strlen (value) + 1);
+	  rl_translate_keyseq (value, _rl_mark_start_color, &len);
+	  _rl_mark_start_color[len] = '\0';
+	}
+      else
+	_rl_mark_start_color = NULL;
+    }
+  else
+    {
+      xfree (_rl_mark_end_color);
+      if (value && *value)
+	{
+	  _rl_mark_end_color = (char *)xmalloc (2 * strlen (value) + 1);
+	  rl_translate_keyseq (value, _rl_mark_end_color, &len);
+	  _rl_mark_end_color[len] = '\0';
+	}
+      else
+	_rl_mark_end_color = NULL;
+    }
+
+  return 0;
+}
+
 void
 _rl_region_color_on (void)
 {
@@ -981,12 +1033,13 @@ _rl_region_color_off (void)
 }
 
 void
-_rl_visible_mark_color_on (void)
+_rl_mark_color_on (void)
 {
 #ifndef __MSDOS__
-  // TODO(ivan): add checks and make it customizable
-  // if (_rl_active_region_start_color && _rl_active_region_end_color)
-    tputs ("\033[105m", 1, _rl_output_character_function);
+  if (_rl_enable_mark_color
+      && _rl_mark_start_color 
+      && _rl_mark_end_color)
+    tputs (_rl_mark_start_color, 1, _rl_output_character_function);
 #endif
 }
 
@@ -1005,12 +1058,13 @@ _rl_visible_mark_color_on (void)
 ////////////////////////////////////////////////////////////////////////////////
 
 void
-_rl_visible_mark_color_off (void)
+_rl_mark_color_off (void)
 {
 #ifndef __MSDOS__
-  // TODO(ivan): add checks and make it customizable
-  // if (_rl_active_region_start_color && _rl_active_region_end_color)
-    tputs ("\033[49m", 1, _rl_output_character_function);
+  if (_rl_enable_mark_color
+      && _rl_mark_start_color 
+      && _rl_mark_end_color)
+    tputs (_rl_mark_end_color, 1, _rl_output_character_function);
 #endif
 }
 

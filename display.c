@@ -1736,14 +1736,14 @@ putc_face (int c, int face, char *cur_face)
         return;
       
       if (!FACE_ISSET (face, FACE_VISIBLE_MARK) && FACE_ISSET (cf, FACE_VISIBLE_MARK))
-        _rl_visible_mark_color_off ();
+        _rl_mark_color_off ();
       if (!FACE_ISSET (face, FACE_STANDOUT) && FACE_ISSET (cf, FACE_STANDOUT))
 	_rl_region_color_off ();
 
       if (FACE_ISSET (face, FACE_STANDOUT) && !FACE_ISSET (cf, FACE_STANDOUT))
 	_rl_region_color_on ();
       if (FACE_ISSET (face, FACE_VISIBLE_MARK) && !FACE_ISSET (cf, FACE_VISIBLE_MARK))
-        _rl_visible_mark_color_on ();
+        _rl_mark_color_on ();
 
       *cur_face = face;
     }
