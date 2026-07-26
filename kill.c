@@ -417,7 +417,6 @@ region_kill_internal (int delete)
       _rl_copy_to_kill_ring (text, rl_point < rl_mark);
     }
 
-  _rl_fix_point (1);
   _rl_last_command_was_kill++;
   return 0;
 }
@@ -433,12 +432,8 @@ rl_copy_region_to_kill (int count, int key)
 int
 rl_kill_region (int count, int key)
 {
-  int r, npoint;
-
-  npoint = (rl_point < rl_mark) ? rl_point : rl_mark;
+  int r;
   r = region_kill_internal (1);
-  rl_point = npoint;
-  _rl_fix_point (1);
   return r;
 }
 
