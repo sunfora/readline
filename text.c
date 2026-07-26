@@ -114,6 +114,10 @@ rl_insert_text (const char *string)
       else
 	rl_add_undo (UNDO_INSERT, rl_point, rl_point + l, (char *)NULL);
     }
+  
+  if (rl_mark >= rl_point)
+    rl_mark += l;
+
   rl_point += l;
   rl_end += l;
   rl_line_buffer[rl_end] = '\0';
@@ -154,10 +158,20 @@ rl_delete_text (int from, int to)
     rl_add_undo (UNDO_DELETE, from, to, text);
   else
     xfree (text);
+  
+  if (from <= rl_point && rl_point < to)
+    rl_point = from;
+  else if (rl_point >= to)
+    rl_point -= diff;
+
+  if (from <= rl_mark && rl_mark < to)
+    rl_mark = from;
+  else if (rl_mark >= to)
+    rl_mark -= diff;
 
   rl_end -= diff;
   rl_line_buffer[rl_end] = '\0';
-  _rl_fix_mark ();
+
   return (diff);
 }
 

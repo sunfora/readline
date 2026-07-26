@@ -209,8 +209,6 @@ rl_kill_word (int count, int key)
 	rl_kill_text (orig_point, rl_point);
 
       rl_point = orig_point;
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
   return 0;
 }
@@ -230,9 +228,6 @@ rl_backward_kill_word (int count, int key)
 
       if (rl_point != orig_point)
 	rl_kill_text (orig_point, rl_point);
-
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
   return 0;
 }
@@ -253,8 +248,6 @@ rl_kill_line (int direction, int key)
       if (orig_point != rl_point)
 	rl_kill_text (orig_point, rl_point);
       rl_point = orig_point;
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
   return 0;
 }
@@ -278,8 +271,6 @@ rl_backward_kill_line (int direction, int key)
 	  rl_beg_of_line (1, key);
 	  if (rl_point != orig_point)
 	    rl_kill_text (orig_point, rl_point);
-	  if (rl_editing_mode == emacs_mode)
-	    rl_mark = rl_point;
 	}
     }
   return 0;
@@ -326,8 +317,6 @@ rl_unix_word_rubout (int count, int key)
 	}
 
       rl_kill_text (orig_point, rl_point);
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
 
   return 0;
@@ -389,8 +378,6 @@ rl_unix_filename_rubout (int count, int key)
 	}
 
       rl_kill_text (orig_point, rl_point);
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
 
   return 0;
@@ -411,8 +398,6 @@ rl_unix_line_discard (int count, int key)
     {
       rl_kill_text (rl_point, 0);
       rl_point = 0;
-      if (rl_editing_mode == emacs_mode)
-	rl_mark = rl_point;
     }
   return 0;
 }
@@ -515,8 +500,10 @@ rl_yank (int count, int key)
       return 1;
     }
 
-  _rl_set_mark_at_pos (rl_point);
+  int yank_start = rl_point;
   rl_insert_text (rl_kill_ring[rl_kill_index]);
+  rl_mark = yank_start;
+
   return 0;
 }
 
@@ -762,8 +749,11 @@ rl_bracketed_paste_begin (int count, int key)
   char *buf;
 
   buf = _rl_bracketed_text (&len);
-  rl_mark = rl_point;
+
+  int bracketed_paste_start = rl_point;
   retval = rl_insert_text (buf) == len ? 0 : 1;
+  rl_mark = bracketed_paste_start;
+
   if (_rl_enable_active_region)
     rl_activate_mark ();
 
