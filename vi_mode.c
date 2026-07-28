@@ -2377,6 +2377,11 @@ _rl_vi_set_mark (void)
 
   if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
+      /* readline don't want to treat `[C` as real command when RightArrow `\e[C` is pressed 
+         instead we would just let the keyseq right after m to execute
+         this is a slight divergence from the way vi/vim implements it
+         but overall not a big issue from the ux point of view */
+      _rl_unget_char (ch); 
       rl_ding ();
       return 1;
     }
@@ -2428,6 +2433,9 @@ _rl_vi_goto_mark (void)
     }
   else if (ch < 0 || ch < 'a' || ch > 'z')	/* make test against 0 explicit */
     {
+      /* this is a slight divergence from how vi/vim handles it
+         see _rl_vi_set_mark for a lengthy explanation */
+      _rl_unget_char (ch);
       rl_ding ();
       return 1;
     }
