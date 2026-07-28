@@ -590,6 +590,11 @@ extern int _rl_vi_ins_modestr_len;
 extern char *_rl_vi_cmd_mode_str;
 extern int _rl_vi_cmd_modestr_len;
 
+extern char *_rl_emacs_defmacro_str;
+extern int _rl_emacs_defmacro_len;
+extern char *_rl_vi_defmacro_str;
+extern int _rl_vi_defmacro_len;
+
 /* isearch.c */
 extern char *_rl_isearch_terminators;
 
@@ -620,6 +625,7 @@ extern int _rl_bind_stty_chars;
 extern int _rl_revert_all_at_newline;
 extern int _rl_echo_control_chars;
 extern int _rl_show_mode_in_prompt;
+extern int _rl_show_defmacro_in_prompt;
 extern int _rl_enable_bracketed_paste;
 extern int _rl_enable_active_region;
 extern int _rl_enable_mark_color;

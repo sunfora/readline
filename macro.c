@@ -234,6 +234,9 @@ _rl_kill_kbd_macro (void)
   executing_macro_index = 0;
 
   RL_UNSETSTATE(RL_STATE_MACRODEF);
+
+  if (_rl_show_defmacro_in_prompt)
+    _rl_reset_prompt ();
 }
 
 /* Begin defining a keyboard macro.
@@ -262,6 +265,10 @@ rl_start_kbd_macro (int ignore1, int ignore2)
     current_macro_index = 0;
 
   RL_SETSTATE(RL_STATE_MACRODEF);
+
+  if (_rl_show_defmacro_in_prompt)
+    _rl_reset_prompt ();
+
   return 0;
 }
 
@@ -283,6 +290,9 @@ rl_end_kbd_macro (int count, int ignore)
   current_macro[current_macro_index] = '\0';
 
   RL_UNSETSTATE(RL_STATE_MACRODEF);
+
+  if (_rl_show_defmacro_in_prompt)
+    _rl_reset_prompt ();
 
   return (rl_call_last_kbd_macro (--count, 0));
 }

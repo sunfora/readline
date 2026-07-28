@@ -1909,6 +1909,7 @@ static const struct {
   { "show-all-if-ambiguous",	&_rl_complete_show_all,		0 },
   { "show-all-if-unmodified",	&_rl_complete_show_unmodified,	0 },
   { "show-mode-in-prompt",	&_rl_show_mode_in_prompt,	V_SPECIAL },
+  { "show-defmacro-in-prompt",  &_rl_show_defmacro_in_prompt,	V_SPECIAL },
   { "skip-completed-text",	&_rl_skip_completed_text,	0 },
 #if defined (VISIBLE_STATS)
   { "visible-stats",		&rl_visible_stats,		0 },
@@ -1952,7 +1953,8 @@ hack_special_boolean_var (int i)
       else
 	_rl_bell_preference = AUDIBLE_BELL;
     }
-  else if (_rl_stricmp (name, "show-mode-in-prompt") == 0)
+  else if (_rl_stricmp (name, "show-mode-in-prompt") == 0
+           || _rl_stricmp (name, "show-defmacro-in-prompt") == 0)
     _rl_reset_prompt ();
   else if (_rl_stricmp (name, "enable-bracketed-paste") == 0)
     _rl_enable_active_region = _rl_enable_bracketed_paste;
@@ -1989,6 +1991,8 @@ static int sv_keymap (const char *);
 static int sv_seqtimeout (const char *);
 static int sv_viins_modestr (const char *);
 static int sv_vicmd_modestr (const char *);
+static int sv_emacs_defmacro_str (const char *);
+static int sv_vi_defmacro_str (const char *);
 
 static const struct {
   const char * const name;
@@ -2010,6 +2014,8 @@ static const struct {
   { "keyseq-timeout",	V_INT,		sv_seqtimeout },
   { "vi-cmd-mode-string", V_STRING,	sv_vicmd_modestr }, 
   { "vi-ins-mode-string", V_STRING,	sv_viins_modestr }, 
+  { "emacs-defmacro-string", V_STRING,	sv_emacs_defmacro_str }, 
+  { "vi-defmacro-string", V_STRING,	sv_vi_defmacro_str }, 
   { "mark-end-color", V_STRING, sv_mark_end_color },
   { "mark-start-color", V_STRING, sv_mark_start_color },
   { (char *)NULL,	0, (_rl_sv_func_t *)0 }
@@ -2292,90 +2298,63 @@ sv_isrchterm (const char *value)
   return 0;
 }
 
-extern char *_rl_emacs_mode_str;
-
 static int
-sv_emacs_modestr (const char *value)
+_set_prompt_prefix (const char *value, char** prompt_str, int* prompt_str_len)
 {
   if (value && *value)
     {
-      FREE (_rl_emacs_mode_str);
-      _rl_emacs_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
-      rl_translate_keyseq (value, _rl_emacs_mode_str, &_rl_emacs_modestr_len);
-      _rl_emacs_mode_str[_rl_emacs_modestr_len] = '\0';
+      FREE (*prompt_str);
+      *prompt_str = (char *)xmalloc (2 * strlen (value) + 1);
+      rl_translate_keyseq (value, *prompt_str, prompt_str_len);
+      (*prompt_str)[*prompt_str_len] = '\0';
       return 0;
     }
   else if (value)
     {
-      FREE (_rl_emacs_mode_str);
-      _rl_emacs_mode_str = (char *)xmalloc (1);
-      _rl_emacs_mode_str[_rl_emacs_modestr_len = 0] = '\0';
+      FREE (*prompt_str);
+      *prompt_str = (char *)xmalloc (1);
+      *prompt_str_len = 0;
+      (*prompt_str)[*prompt_str_len] = '\0';
       return 0;
     }
   else if (value == 0)
     {
-      FREE (_rl_emacs_mode_str);
-      _rl_emacs_mode_str = 0;	/* prompt_modestr does the right thing */
-      _rl_emacs_modestr_len = 0;
+      FREE (*prompt_str);
+      *prompt_str = 0;	/* prompt_modestr does the right thing */
+      *prompt_str_len = 0;
       return 0;
     }
   return 1;
+}
+
+static int
+sv_emacs_modestr (const char *value)
+{
+  return _set_prompt_prefix (value, &_rl_emacs_mode_str, &_rl_emacs_modestr_len);
 }
 
 static int
 sv_viins_modestr (const char *value)
 {
-  if (value && *value)
-    {
-      FREE (_rl_vi_ins_mode_str);
-      _rl_vi_ins_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
-      rl_translate_keyseq (value, _rl_vi_ins_mode_str, &_rl_vi_ins_modestr_len);
-      _rl_vi_ins_mode_str[_rl_vi_ins_modestr_len] = '\0';
-      return 0;
-    }
-  else if (value)
-    {
-      FREE (_rl_vi_ins_mode_str);
-      _rl_vi_ins_mode_str = (char *)xmalloc (1);
-      _rl_vi_ins_mode_str[_rl_vi_ins_modestr_len = 0] = '\0';
-      return 0;
-    }
-  else if (value == 0)
-    {
-      FREE (_rl_vi_ins_mode_str);
-      _rl_vi_ins_mode_str = 0;	/* prompt_modestr does the right thing */
-      _rl_vi_ins_modestr_len = 0;
-      return 0;
-    }
-  return 1;
+  return _set_prompt_prefix (value, &_rl_vi_ins_mode_str, &_rl_vi_ins_modestr_len);
 }
 
 static int
 sv_vicmd_modestr (const char *value)
 {
-  if (value && *value)
-    {
-      FREE (_rl_vi_cmd_mode_str);
-      _rl_vi_cmd_mode_str = (char *)xmalloc (2 * strlen (value) + 1);
-      rl_translate_keyseq (value, _rl_vi_cmd_mode_str, &_rl_vi_cmd_modestr_len);
-      _rl_vi_cmd_mode_str[_rl_vi_cmd_modestr_len] = '\0';
-      return 0;
-    }
-  else if (value)
-    {
-      FREE (_rl_vi_cmd_mode_str);
-      _rl_vi_cmd_mode_str = (char *)xmalloc (1);
-      _rl_vi_cmd_mode_str[_rl_vi_cmd_modestr_len = 0] = '\0';
-      return 0;
-    }
-  else if (value == 0)
-    {
-      FREE (_rl_vi_cmd_mode_str);
-      _rl_vi_cmd_mode_str = 0;	/* prompt_modestr does the right thing */
-      _rl_vi_cmd_modestr_len = 0;
-      return 0;
-    }
-  return 1;
+  return _set_prompt_prefix (value, &_rl_vi_cmd_mode_str, &_rl_vi_cmd_modestr_len);
+}
+
+static int
+sv_emacs_defmacro_str (const char *value)
+{
+  return _set_prompt_prefix (value, &_rl_emacs_defmacro_str, &_rl_emacs_defmacro_len);
+}
+
+static int
+sv_vi_defmacro_str (const char *value)
+{
+  return _set_prompt_prefix (value, &_rl_vi_defmacro_str, &_rl_vi_defmacro_len);
 }
 
 /* Return the character which matches NAME.
@@ -3092,6 +3071,10 @@ _rl_get_string_variable_value (const char *name)
     return (_rl_vi_cmd_mode_str ? _rl_vi_cmd_mode_str : RL_VI_CMD_MODESTR_DEFAULT);
   else if (_rl_stricmp (name, "vi-ins-mode-string") == 0)
     return (_rl_vi_ins_mode_str ? _rl_vi_ins_mode_str : RL_VI_INS_MODESTR_DEFAULT);
+  else if (_rl_stricmp (name, "emacs-defmacro-string") == 0)
+    return (_rl_emacs_defmacro_str ? _rl_emacs_defmacro_str: RL_EMACS_DEFMACRO_STR_DEFAULT);
+  else if (_rl_stricmp (name, "vi-defmacro-string") == 0)
+    return (_rl_vi_defmacro_str ? _rl_vi_defmacro_str: RL_VI_DEFMACRO_STR_DEFAULT);
   else
     return (0);
 }

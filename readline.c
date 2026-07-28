@@ -320,6 +320,10 @@ int _rl_echo_control_chars = 1;
    the editing mode: @ for emacs, : for vi-command, + for vi-insert. */
 int _rl_show_mode_in_prompt = 0;
 
+/* Non-zero means to prefix the displayed prompt with a character indicating
+   the recording of kbd-macro: (*) */
+int _rl_show_defmacro_in_prompt = 0;
+
 /* Non-zero means to attempt to put the terminal in `bracketed paste mode',
    where it will prefix pasted text with an escape sequence and send
    another to mark the end of the paste. */

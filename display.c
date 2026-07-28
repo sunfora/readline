@@ -185,6 +185,13 @@ int _rl_vi_ins_modestr_len;
 char *_rl_vi_cmd_mode_str;
 int _rl_vi_cmd_modestr_len;
 
+/* Variables used to include the macro recording indicator in the promt */
+char *_rl_emacs_defmacro_str;
+int _rl_emacs_defmacro_len;
+
+char *_rl_vi_defmacro_str;
+int _rl_vi_defmacro_len;
+
 /* Pseudo-global variables declared here. */
 
 /* Hints for other parts of readline to give to the display engine. */
@@ -332,6 +339,23 @@ prompt_modestr (int *lenp)
     }
 }
 
+static char *
+prompt_macrostr (int *lenp)
+{
+  if (rl_editing_mode == emacs_mode) 
+    {
+      if (lenp)
+        *lenp = _rl_emacs_defmacro_str ? _rl_emacs_defmacro_len : RL_EMACS_DEFMACRO_LEN_DEFAULT;
+      return _rl_emacs_defmacro_str ? _rl_emacs_defmacro_str : RL_EMACS_DEFMACRO_STR_DEFAULT;
+    }
+  else
+    {
+      if (lenp)
+        *lenp = _rl_vi_defmacro_str ? _rl_vi_defmacro_len : RL_VI_DEFMACRO_LEN_DEFAULT;
+      return _rl_vi_defmacro_str ? _rl_vi_defmacro_str : RL_VI_DEFMACRO_STR_DEFAULT;
+    }
+}
+
 /* Expand the prompt string S and return the number of visible
    characters in *LP, if LP is not null.  This is currently more-or-less
    a placeholder for expansion.  LIP, if non-null is a place to store the
@@ -358,20 +382,44 @@ prompt_modestr (int *lenp)
 static char *
 expand_prompt (char *pmt, int flags, int *lp, int *lip, int *niflp, int *vlp)
 {
-  char *r, *ret, *p, *igstart, *nprompt, *ms;
+  char *r, *ret, *p, *igstart, *nprompt, *modestr, *macrostr;
   int l, rl, last, ignoring, ninvis, invfl, invflset, ind, pind, physchars;
-  int mlen, newlines, newlines_guess, bound, can_add_invis, lastinvis;
+  int modestr_len, macrostr_len, newlines, newlines_guess, bound, can_add_invis, lastinvis;
   int mb_cur_max;
 
   /* We only expand the mode string for the last line of a multiline prompt
      (a prompt with embedded newlines). */
-  ms = (((pmt == rl_prompt) ^ (flags & PMT_MULTILINE)) && _rl_show_mode_in_prompt) ? prompt_modestr (&mlen) : 0;
-  if (ms)
+  int is_this_a_last_line = ((pmt == rl_prompt) ^ (flags & PMT_MULTILINE));
+  int show_macro_rec = _rl_show_defmacro_in_prompt && RL_ISSTATE(RL_STATE_MACRODEF);
+
+  if (is_this_a_last_line && _rl_show_mode_in_prompt)
+    {
+      modestr = prompt_modestr (&modestr_len);
+    }
+  else
+    {
+      modestr = 0;
+      modestr_len = 0;
+    }
+
+  if (is_this_a_last_line && show_macro_rec)
+    {
+      macrostr = prompt_macrostr (&macrostr_len);
+    }
+  else
+    {
+      macrostr = 0;
+      macrostr_len = 0;
+    }
+
+  if (modestr || macrostr)
     {
       l = strlen (pmt);
-      nprompt = (char *)xmalloc (l + mlen + 1);
-      memcpy (nprompt, ms, mlen);
-      strcpy (nprompt + mlen, pmt);
+      nprompt = (char *)xmalloc (l + modestr_len + macrostr_len + 1);
+      // TODO(ivan): is memcpy of 0 is correct?
+      memcpy (nprompt, modestr, modestr_len);
+      memcpy (nprompt + modestr_len, macrostr, macrostr_len);
+      strcpy (nprompt + modestr_len + macrostr_len , pmt);
     }
   else
     nprompt = pmt;
